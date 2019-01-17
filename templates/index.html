@@ -1,54 +1,89 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <script src="{{ url_for('static', filename='js/jquery-1.11.1.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/convert.js') }}"></script>
+<html lang="en">
+    <head>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" integrity="sha256-rfN9xU0ELcvTsc3WUaKlvSVEfzLvFCyl+ID09aieASo=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/mode-javascript.js" integrity="sha256-9nVHCZW1SuyhaVgqmPk1XutGn+g/ASVBiVAheioldo4=" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/parser.css') }}">
+        <title>Ansible Jinja2 Tester</title>
+    </head>
 
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
-    <title>Jinja live parser</title>
-</head>
-
-<body>
-    <form class="container">
-        <div class="row">
-            <div class="col-md-5">
-                <h1>Template</h1>
-                <textarea id="template">{% include 'example_template.html' %}</textarea>
+    <body>
+        <div class="grid-container">
+          <div class="values">
+            <div class="values_label">
+                <h1 class="label">Values</h1>
             </div>
-            <div class="col-md-5">
-                <h1>Render</h1>
+            <div class="values_format align-self-end text-right">
+                <label class="label"><input type="radio" name="input_type" value="json" checked="checked"/> JSON</label>
+                <label class="label"><input type="radio" name="input_type" value="yaml"/> YAML</label>
+            </div>
+            <div class="values_editor">
+                <div id="values"></div>
+            </div>
+          </div>
+          <div class="template">
+            <div class="template_label">
+                <h1 class="label">Template</h1>
+            </div>
+            <div class="template_button align-self-end text-right">
+                <input type="button" class="btn btn-success" id="convert" value="Convert" />
+            </div>
+            <div class="template_editor">
+                <div id="template"></div>
+            </div>
+          </div>
+          <div class="render">
+            <div class="render_label">
+                <h1 class="label">Render</h1>
+            </div>
+            <div class="render_display">
                 <div id="render"></div>
             </div>
-            <div class="col-md-2">
-                <h1>Settings</h1>
-                <div id="settings">
-                    <label><input type="checkbox" name="showwhitespaces" checked="checked" /> Show whitespaces</label><br/>
-                    <label><input type="checkbox" name="dummyvalues" /> Use dummy values</label>
-                    <label><input type="radio" name="input_type" value="json" checked="checked"/> JSON</label>
-                    <label><input type="radio" name="input_type" value="yaml"/> YAML</label>
-                    <input type="button" class="btn btn-success" id="convert" value="Convert" />
-                    <input type="button" class="btn btn-danger" id="clear" value="Clear" />
-                </div>
-            </div>
+          </div>
         </div>
+        <script type="text/javascript" charset="utf-8">
+            $(document).ready(() => {
+                ace.config.setModuleUrl("ace/mode/jinja2", "{{ url_for('static', filename='js/jinja2.js') }}");
 
-        <div class="row">
-            <div class="col-md-5">
-                <h1>Values</h1>
-                <textarea id="values">{% include 'example_values.html' %}</textarea>
-            </div>
-            <div class="col-md-7">
-                <h1>Custom Filters</h1>
-                <ul>
-                {% for f_name, f_func in custom_filters.items() %}
-                    <li>{{ f_name }}: {{ f_func.func_doc }}</li>
-                {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </form>
-</body>
+                let input_type = $('input[name="input_type"]:checked').val();
+                let values_editor = ace.edit("values");
+                values_editor.setTheme("ace/theme/chrome");
+                values_editor.setShowInvisibles(true);
+                values_editor.session.setMode("ace/mode/" + input_type);
+                values_editor.setShowPrintMargin(false);
+                values_editor.setValue("{\n}");
 
+                let template_editor = ace.edit("template");
+                template_editor.setTheme("ace/theme/chrome");
+                template_editor.setShowInvisibles(true);
+                template_editor.setShowPrintMargin(false);
+                template_editor.session.setMode("ace/mode/jinja2")
+
+                let render_editor = ace.edit("render");
+                render_editor.setTheme("ace/theme/chrome");
+                render_editor.setShowInvisibles(true);
+                render_editor.setShowPrintMargin(false);
+                render_editor.setReadOnly(true);
+
+                $('input[name="input_type"]').click(() => {
+                    let input_type = $('input[name="input_type"]:checked').val();
+                    values_editor.session.setMode("ace/mode/" + input_type);
+                });
+
+                $('#convert').click(() => {
+                    let input_type = $('input[name="input_type"]:checked').val();
+                    $.post('/convert', {
+                        template: template_editor.getValue(),
+                        values: values_editor.getValue(),
+                        input_type: input_type
+                    }).done(function (response) {
+                        render_editor.setValue(response, 1);
+                    });
+                });
+            });
+        </script>
+    </body>
 </html>

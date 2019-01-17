@@ -1,8 +1,8 @@
 {
-  "name": "Jinja2 live (web) parser",
-  "description": "Jinja2 live (web) parser",
+  "name": "Ansible Jinja2 Tester",
+  "description": "Ansible Jinja2 Tester",
   "repository": "https://github.com/heroku/button-sample",
-  "keywords": ["Jinja2"],
+  "keywords": ["Ansible","Jinja2"],
   "env": {
     "HOST": {
       "description": "the IP to bind to",

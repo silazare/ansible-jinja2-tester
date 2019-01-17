@@ -1,6 +1,9 @@
+Copyright for portions of project [Ansible Jinja2 Tester](https://github.com/kadaan/ansible-jinja2-tester/) are held by [Antonin Bourguignon, 2017] as part of project [Jinja2 live parser](https://github.com/qn7o/jinja2-live-parser/). 
+All other copyright for project [Ansible Jinja2 Tester](https://github.com/kadaan/ansible-jinja2-tester/) Tester are held by [Joel Baranick, 2019].
+
 MIT License
 
-Copyright (c) 2017 Antonin Bourguignon
+Copyright (c) 2019 Joel Baranick
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

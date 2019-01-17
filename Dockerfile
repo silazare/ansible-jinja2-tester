@@ -1,14 +1,14 @@
 ###################################
-# Jinja2 live parser Dockerfile
+# Ansible Jinja2 Tester Dockerfile
 #
 # Version: 0.1
-# Author:  Sonu K. Meena(sahilsk)<sonukr666@gmail.com >
+# Author:  Joel Baranick(kadaan)<jbaranick@gmail.com>
 ###################################
 
 # Pull base image.
 FROM python:2.7
 
-RUN git clone https://github.com/qn7o/jinja2-live-parser.git /data
+RUN git clone https://github.com/kadaan/ansible-jinja2-tester.git /data
 
 WORKDIR /data
 
