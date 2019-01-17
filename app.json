@@ -1,7 +1,8 @@
 {
   "name": "Ansible Jinja2 Tester",
   "description": "Ansible Jinja2 Tester",
-  "repository": "https://github.com/heroku/button-sample",
+  "image": "heroku/python",
+  "repository": "https://github.com/kadaan/ansible-jinja2-tester",
   "keywords": ["Ansible","Jinja2"],
   "env": {
     "HOST": {
