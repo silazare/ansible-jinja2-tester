@@ -27,16 +27,15 @@ def convert():
     if request.form['input_type'] == "json":
         try:
             values = json.loads(request.form['values'])
-        except ValueError as e:
+        except Exception as e:
             return "Invalid JSON: {0}".format(e)
     elif request.form['input_type'] == "yaml":
         try:
             values = yaml.load(request.form['values'])
-        except (ValueError, yaml.parser.ParserError, TypeError) as e:
+        except Exception as e:
             return "Invalid YAML: {0}".format(e)
     else:
         return "Unsupported input type: {0}".format(request.form['input_type'])
-
 
     try:
         # jinja2_tpl = jinja2_env.from_string(request.form['template'])
