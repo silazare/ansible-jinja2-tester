@@ -89,6 +89,7 @@ def snapshot():
         code = hasher.encode_hex(snapshot_key_hex)
         return "%s%s" % (request.url_root, code)
     except Exception as e:
+        app.logger.error('Failed to save snapshot: %s', e)
         abort(500)
 
 
