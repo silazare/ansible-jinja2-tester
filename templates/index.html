@@ -93,7 +93,7 @@
         render_editor.setShowInvisibles(true);
         render_editor.setShowPrintMargin(false);
         render_editor.setReadOnly(true);
-        render_editor.setValue("", 1);
+        render_editor.setValue("{{ render|safe|escape }}", 1);
 
         $('input[name="values_type"]').change(() => {
           let values_type = $('input[name="values_type"]:checked').prop('id');
@@ -107,7 +107,8 @@
             values: values_editor.getValue(),
             values_type: values_type
           }).done(response => {
-            render_editor.setValue(response, 1);
+            let result_json = $.parseJSON(response);
+            render_editor.setValue(result_json['result'], 1);
           });
         });
 
@@ -119,9 +120,10 @@
         $('#snapshot').click(() => {
           let values_type = $('input[name="values_type"]:checked').prop('id');
           $.post('/snapshot', {
-            template: template_editor.getValue(),
+            values_type: values_type,
             values: values_editor.getValue(),
-            values_type: values_type
+            template: template_editor.getValue(),
+            render: render_editor.getValue(),
           }).done((data) => {
             $('#snapshot_alert_message').html('Your snapshot is available at <a href="' + data + '">here</a>.  Copy this link to share your snapshot with others.');
             let snapshot_alert = $('#snapshot_alert');

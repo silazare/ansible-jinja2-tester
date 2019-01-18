@@ -38,6 +38,7 @@ def home(code=None):
     values_type = "json"
     values = "{\\n}"
     template = ""
+    render = ""
     if code is not None:
         if not enable_snapshots:
             abort(404)
@@ -48,16 +49,16 @@ def home(code=None):
             snapshot_key = snapshot_key_bytes.decode()
             snapshots = snapshots_db.order_by_key().equal_to(snapshot_key).limit_to_first(1).get()
             _, snapshot_value = next(iter(snapshots.items()))
-            snapshot_object = json.loads(snapshot_value)
-            values_type = snapshot_object['values_type']
-            values = json.dumps(str(snapshot_object['values'])).strip('"')
-            template = json.dumps(str(snapshot_object['template'])).strip('"')
+            values_type = escape_value(snapshot_value['values_type'])
+            values = escape_value(snapshot_value['values'])
+            template = escape_value(snapshot_value['template'])
+            render = escape_value(snapshot_value['render'])
         except Exception as e:
             app.logger.exception('Failed to load snapshot: %s', e, )
             abort(500)
 
     return render_template('index.html', enable_snapshots=enable_snapshots, values_type=values_type, values=values,
-                           template=template, ansible_version=ansible.__version__)
+                           template=template, render=render, ansible_version=ansible.__version__)
 
 
 @app.route('/favicon.ico')
@@ -72,18 +73,19 @@ def snapshot():
         abort(404)
 
     values_type = get_values_type()
-    values = get_values()
+    values = get_values_raw()
     template = get_template()
+    render = get_render()
     data = {
         "values_type": values_type,
         "values": values,
         "template": template,
-        ".sv": "timestamp"
+        "render": render,
+        "timestamp": {".sv": "timestamp"}
     }
     # noinspection PyBroadException
     try:
-        json_data = json.dumps(data)
-        snapshot_ref = snapshots_db.push(json_data)
+        snapshot_ref = snapshots_db.push(data)
         snapshot_key = snapshot_ref.key
         snapshot_key_bytes = snapshot_key.encode()
         snapshot_key_hex = binascii.hexlify(snapshot_key_bytes)
@@ -108,7 +110,11 @@ def test():
     except Exception as e:
         return "Template rendering failed: {0}".format(e)
 
-    return escape(str(rendered))
+    result = {
+        "result": str(rendered)
+    }
+
+    return json.dumps(result)
 
 
 def get_values_type():
@@ -120,16 +126,20 @@ def get_values_type():
         return "Unsupported value type: {0}".format(request.form['values_type'])
 
 
+def get_values_raw():
+    return request.form['values']
+
+
 def get_values():
     values_type = get_values_type()
     if values_type == "json":
         try:
-            return json.loads(request.form['values'])
+            return json.loads(get_values_raw())
         except Exception as e:
             return "Invalid JSON: {0}".format(e)
     elif values_type == "yaml":
         try:
-            return yaml.load(request.form['values'])
+            return yaml.load(get_values_raw())
         except Exception as e:
             return "Invalid YAML: {0}".format(e)
     else:
@@ -138,6 +148,14 @@ def get_values():
 
 def get_template():
     return request.form['template']
+
+
+def get_render():
+    return request.form['render']
+
+
+def escape_value(value):
+    return str(value).encode('string_escape').replace('"', '\\"')
 
 
 if __name__ == "__main__":
