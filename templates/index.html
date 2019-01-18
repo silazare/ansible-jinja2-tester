@@ -1,89 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" integrity="sha256-rfN9xU0ELcvTsc3WUaKlvSVEfzLvFCyl+ID09aieASo=" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/mode-javascript.js" integrity="sha256-9nVHCZW1SuyhaVgqmPk1XutGn+g/ASVBiVAheioldo4=" crossorigin="anonymous"></script>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/parser.css') }}">
-        <title>Ansible Jinja2 Tester</title>
-    </head>
+  <head>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" integrity="sha256-rfN9xU0ELcvTsc3WUaKlvSVEfzLvFCyl+ID09aieASo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/mode-javascript.js" integrity="sha256-9nVHCZW1SuyhaVgqmPk1XutGn+g/ASVBiVAheioldo4=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/parser.css') }}">
+    <title>Ansible Jinja2 Tester</title>
+  </head>
 
-    <body>
-        <div class="grid-container">
-          <div class="values">
-            <div class="values_label">
-                <h1 class="label">Values</h1>
-            </div>
-            <div class="values_format align-self-end text-right">
-                <label class="label"><input type="radio" name="input_type" value="json" checked="checked"/> JSON</label>
-                <label class="label"><input type="radio" name="input_type" value="yaml"/> YAML</label>
-            </div>
-            <div class="values_editor">
-                <div id="values"></div>
-            </div>
-          </div>
-          <div class="template">
-            <div class="template_label">
-                <h1 class="label">Template</h1>
-            </div>
-            <div class="template_button align-self-end text-right">
-                <input type="button" class="btn btn-success" id="convert" value="Convert" />
-            </div>
-            <div class="template_editor">
-                <div id="template"></div>
-            </div>
-          </div>
-          <div class="render">
-            <div class="render_label">
-                <h1 class="label">Render</h1>
-            </div>
-            <div class="render_display">
-                <div id="render"></div>
-            </div>
+  <body>
+    {%- if enable_snapshots %}
+    <div id="snapshot_alert" class="fixed-top alert snapshot_alert fade col-md-6 mx-auto d-none" role="alert">
+      <span id="snapshot_alert_message"></span>
+      <button id="snapshot_alert_close_button" type="button" class="close" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {% endif -%}
+    <div class="grid-container">
+      <div class="values">
+        <div class="values_label">
+           <h1 class="label">Values</h1>
+        </div>
+        <div class="values_format align-self-end text-right">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label for="json" class="btn btn-sm btn-primary active">
+              <input type="radio" name="values_type" id="json" autocomplete="off" {{ 'checked' if values_type != 'yaml' else '' }}> JSON
+            </label>
+            <label for="yaml" class="btn btn-sm btn-primary">
+              <input type="radio" name="values_type" id="yaml" autocomplete="off" {{ 'checked' if values_type == 'yaml' else '' }}> YAML
+            </label>
           </div>
         </div>
-        <script type="text/javascript" charset="utf-8">
-            $(document).ready(() => {
-                ace.config.setModuleUrl("ace/mode/jinja2", "{{ url_for('static', filename='js/jinja2.js') }}");
+        <div class="values_editor">
+            <div id="values"></div>
+        </div>
+      </div>
+      <div class="template">
+        <div class="template_label">
+          <h1 class="label">Template</h1>
+        </div>
+        <div class="template_button align-self-end text-right">
+          <button type="button" class="btn btn-sm btn-success" id="test" title="Run the test.">
+            <i class="fa fa-play text-white"></i> Test
+          </button>
+          {%- if enable_snapshots %}
+          <button type="button" class="btn btn-sm btn-warning" id="snapshot" title="Take a snapshot for sharing.">
+            <span class="fa fa-camera fa-lg text-white"></span>
+          </button>
+          {% endif -%}
+        </div>
+        <div class="template_editor">
+          <div id="template"></div>
+        </div>
+      </div>
+      <div class="render">
+        <div class="render_label">
+          <h1 class="label">Render</h1>
+        </div>
+        <div class="render_data align-self-end text-right">
+            <span class="font-weight-light text-secondary">Ansible Version: {{ ansible_version }}</span>
+        </div>
+        <div class="render_display">
+          <div id="render"></div>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript" charset="utf-8">
+      $(document).ready(() => {
+        ace.config.setModuleUrl("ace/mode/jinja2", "{{ url_for('static', filename='js/jinja2.js') }}");
 
-                let input_type = $('input[name="input_type"]:checked').val();
-                let values_editor = ace.edit("values");
-                values_editor.setTheme("ace/theme/chrome");
-                values_editor.setShowInvisibles(true);
-                values_editor.session.setMode("ace/mode/" + input_type);
-                values_editor.setShowPrintMargin(false);
-                values_editor.setValue("{\n}");
+        let values_type = $('input[name="values_type"]:checked').prop('id');
+        let values_editor = ace.edit("values");
+        values_editor.setTheme("ace/theme/chrome");
+        values_editor.setShowInvisibles(true);
+        values_editor.setShowPrintMargin(false);
+        values_editor.session.setMode("ace/mode/" + values_type);
+        values_editor.setValue("{{ values|safe|escape }}", 1);
 
-                let template_editor = ace.edit("template");
-                template_editor.setTheme("ace/theme/chrome");
-                template_editor.setShowInvisibles(true);
-                template_editor.setShowPrintMargin(false);
-                template_editor.session.setMode("ace/mode/jinja2")
+        let template_editor = ace.edit("template");
+        template_editor.setTheme("ace/theme/chrome");
+        template_editor.setShowInvisibles(true);
+        template_editor.setShowPrintMargin(false);
+        template_editor.session.setMode("ace/mode/jinja2")
+        template_editor.setValue("{{ template|safe|escape }}", 1);
 
-                let render_editor = ace.edit("render");
-                render_editor.setTheme("ace/theme/chrome");
-                render_editor.setShowInvisibles(true);
-                render_editor.setShowPrintMargin(false);
-                render_editor.setReadOnly(true);
+        let render_editor = ace.edit("render");
+        render_editor.setTheme("ace/theme/chrome");
+        render_editor.setShowInvisibles(true);
+        render_editor.setShowPrintMargin(false);
+        render_editor.setReadOnly(true);
+        render_editor.setValue("", 1);
 
-                $('input[name="input_type"]').click(() => {
-                    let input_type = $('input[name="input_type"]:checked').val();
-                    values_editor.session.setMode("ace/mode/" + input_type);
-                });
+        $('input[name="values_type"]').change(() => {
+          let values_type = $('input[name="values_type"]:checked').prop('id');
+          values_editor.session.setMode("ace/mode/" + values_type);
+        });
 
-                $('#convert').click(() => {
-                    let input_type = $('input[name="input_type"]:checked').val();
-                    $.post('/convert', {
-                        template: template_editor.getValue(),
-                        values: values_editor.getValue(),
-                        input_type: input_type
-                    }).done(function (response) {
-                        render_editor.setValue(response, 1);
-                    });
-                });
-            });
-        </script>
-    </body>
+        $('#test').click(() => {
+          let values_type = $('input[name="values_type"]:checked').prop('id');
+          $.post('/test', {
+            template: template_editor.getValue(),
+            values: values_editor.getValue(),
+            values_type: values_type
+          }).done(response => {
+            render_editor.setValue(response, 1);
+          });
+        });
+
+        {%- if enable_snapshots %}
+        $('#snapshot_alert_close_button').click(() => {
+           $('#snapshot_alert').hide();
+        });
+
+        $('#snapshot').click(() => {
+          $.post('/snapshot', {
+            template: template_editor.getValue(),
+            values: values_editor.getValue(),
+            values_type: values_type
+          }).done((data) => {
+            $('#snapshot_alert_message').html('Your snapshot is available at <a href="' + data + '">here</a>.  Copy this link to share your snapshot with others.');
+            let snapshot_alert = $('#snapshot_alert');
+            snapshot_alert.removeClass('alert-danger');
+            snapshot_alert.addClass('alert-info');
+          }).fail(() => {
+            $('#snapshot_alert_message').text('Your snapshot has failed to save.  Please try again.');
+            let snapshot_alert = $('#snapshot_alert');
+            snapshot_alert.removeClass('alert-info');
+            snapshot_alert.addClass('alert-danger');
+            setTimeout(function() {
+              snapshot_alert.addClass('d-none');
+            }, 10000);
+          }).always(() => {
+            let snapshot_alert = $('#snapshot_alert');
+            snapshot_alert.removeClass('d-none');
+          });
+        });
+        {% endif -%}
+      });
+    </script>
+  </body>
 </html>

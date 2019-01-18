@@ -8,6 +8,13 @@
     "HOST": {
       "description": "the IP to bind to",
       "value": "0.0.0.0"
+    },
+    "FIREBASE_URL": {
+      "description": "the URL to the firebase realtime database for storing snapshots",
+      "value": "http://localhost"
+    },
+    "FIREBASE_CREDENTIALS_BASE64": {
+      "description": "the base64 encoded credentials used to authenticate with firebase"
     }
   }
 }

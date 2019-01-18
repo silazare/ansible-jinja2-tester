@@ -1,5 +1,6 @@
 body {
-  margin: 5px;
+  margin: 0;
+  padding: 0;
   min-width: 480px;
 }
 
@@ -8,6 +9,7 @@ body, .grid-container {
 }
 
 .grid-container {
+  padding: 5px;
   display: grid;
   grid-gap: 20px;
   grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(120px, 1fr);
@@ -49,11 +51,13 @@ body, .grid-container {
 .render {
   grid-template-columns: 1fr;
   grid-template-rows: 2.5rem auto;
-  grid-template-areas: "render_label" "render_display";
+  grid-template-areas: "render_label render_data" "render_display render_display";
   grid-area: render;
 }
 
 .render_label { grid-area: render_label; }
+
+.render_data { grid-area: render_data; }
 
 .render_display { grid-area: render_display; }
 
@@ -62,5 +66,10 @@ body, .grid-container {
 }
 
 .label {
-    margin-bottom: 0px;
+  margin-bottom: 0px;
+}
+
+.snapshot_alert {
+  margin: 10px;
+  opacity: .97 !important;
 }

@@ -67,3 +67,6 @@ settings.py
 
 # Python virtualenv
 .venv
+
+# Firebase
+serviceAccountKey.json
