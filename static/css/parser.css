@@ -44,7 +44,10 @@ body, .grid-container {
 
 .template_label { grid-area: template_label; }
 
-.template_button { grid-area: template_button; }
+.template_button {
+  white-space: nowrap;
+  grid-area: template_button;
+}
 
 .template_editor { grid-area: template_editor; }
 
