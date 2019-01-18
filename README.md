@@ -13,18 +13,6 @@ A lightweight live parser for the [Ansible](https://www.ansible.com/) flavor of 
     $ pip install -r requirements.txt
     $ python parser.py
 
-### Dockerfile
-
-Build it:
-
-    docker build -t mydocker/j2parser .
-    docker run -d -p 5000:5000 mydocker/j2parser
-
-Or simply pull it from registry (without building):
-
-    docker run -d -p 5000:5000 kadaan/j2parser
-
-
 ## Usage
 
 You are all set, go to `http://localhost:5000/` and have fun.  

@@ -3,3 +3,4 @@ Flask==1.0.2
 PyYAML==3.13
 firebase-admin==2.15.0
 hashids==1.2.0
+gunicorn==19.9.0
