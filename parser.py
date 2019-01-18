@@ -52,8 +52,9 @@ def home(code=None):
             values_type = snapshot_object['values_type']
             values = json.dumps(str(snapshot_object['values'])).strip('"')
             template = json.dumps(str(snapshot_object['template'])).strip('"')
-        except:
-            pass
+        except Exception as e:
+            app.logger.exception('Failed to load snapshot: %s', e, )
+            abort(500)
 
     return render_template('index.html', enable_snapshots=enable_snapshots, values_type=values_type, values=values,
                            template=template, ansible_version=ansible.__version__)
@@ -89,7 +90,7 @@ def snapshot():
         code = hasher.encode_hex(snapshot_key_hex)
         return "%s%s" % (request.url_root, code)
     except Exception as e:
-        app.logger.error('Failed to save snapshot: %s', e)
+        app.logger.exception('Failed to save snapshot: %s', e, )
         abort(500)
 
 
