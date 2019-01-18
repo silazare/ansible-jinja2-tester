@@ -102,13 +102,12 @@ def test():
     try:
         loader = DataLoader()
         templar = Templar(loader=loader, variables=values)
+        try:
+            rendered = templar.template(get_template())
+        except Exception as e:
+            rendered = "Template rendering failed: {0}".format(e)
     except Exception as e:
-        return "Template syntax error: {0}".format(e)
-
-    try:
-        rendered = templar.template(get_template())
-    except Exception as e:
-        return "Template rendering failed: {0}".format(e)
+        rendered = "Template syntax error: {0}".format(e)
 
     result = {
         "result": str(rendered)
