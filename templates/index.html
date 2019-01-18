@@ -117,6 +117,7 @@
         });
 
         $('#snapshot').click(() => {
+          let values_type = $('input[name="values_type"]:checked').prop('id');
           $.post('/snapshot', {
             template: template_editor.getValue(),
             values: values_editor.getValue(),
