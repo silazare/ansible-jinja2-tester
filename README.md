@@ -16,3 +16,6 @@ An online, interactive test tool for the [Ansible](https://www.ansible.com/) fla
 
 You are all set, go to `http://localhost:5000/` and have fun.  
 
+## Preview
+
+![preview](https://i.imgur.com/VJsRi7o.png)
