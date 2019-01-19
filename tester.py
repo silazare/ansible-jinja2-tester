@@ -4,8 +4,6 @@ from __future__ import absolute_import, print_function
 import ansible
 from ansible.template import Templar
 from ansible.parsing.dataloader import DataLoader
-import binascii
-from cgi import escape
 import config
 import firebase_admin
 from firebase_admin import credentials, db
@@ -23,11 +21,12 @@ def is_snapshots_enabled():
 
 app = Flask(__name__)
 if is_snapshots_enabled():
-    hasher = hashids.Hashids(config.FIREBASE_URL)
+    hasher = hashids.Hashids(config.FIREBASE_URL, min_length=6)
     cred = credentials.Certificate(config.FIREBASE_CREDENTIALS)
     firebase_admin.initialize_app(cred, {
         'databaseURL': config.FIREBASE_URL
     })
+    counter_db = db.reference('counter')
     snapshots_db = db.reference('snapshots')
 
 
@@ -35,8 +34,8 @@ if is_snapshots_enabled():
 @app.route("/<code>")
 def home(code=None):
     enable_snapshots = is_snapshots_enabled()
-    values_type = "json"
-    values = "{\\n}"
+    values_type = "yaml"
+    values = ""
     template = ""
     render = ""
     if code is not None:
@@ -44,10 +43,7 @@ def home(code=None):
             abort(404)
         # noinspection PyBroadException
         try:
-            snapshot_key_hex = hasher.decode_hex(code)
-            snapshot_key_bytes = binascii.unhexlify(snapshot_key_hex)
-            snapshot_key = snapshot_key_bytes.decode()
-            snapshots = snapshots_db.order_by_key().equal_to(snapshot_key).limit_to_first(1).get()
+            snapshots = snapshots_db.order_by_key().equal_to(code).limit_to_first(1).get()
             _, snapshot_value = next(iter(snapshots.items()))
             values_type = escape_value(snapshot_value['values_type'])
             values = escape_value(snapshot_value['values'])
@@ -85,15 +81,17 @@ def snapshot():
     }
     # noinspection PyBroadException
     try:
-        snapshot_ref = snapshots_db.push(data)
-        snapshot_key = snapshot_ref.key
-        snapshot_key_bytes = snapshot_key.encode()
-        snapshot_key_hex = binascii.hexlify(snapshot_key_bytes)
-        code = hasher.encode_hex(snapshot_key_hex)
+        new_id = counter_db.transaction(increment_counter)
+        code = hasher.encode(new_id)
+        snapshots_db.child(code).set(data)
         return "%s%s" % (request.url_root, code)
     except Exception as e:
         app.logger.exception('Failed to save snapshot: %s', e, )
         abort(500)
+
+
+def increment_counter(current_value):
+    return current_value + 1 if current_value else 1
 
 
 @app.route('/test', methods=['GET', 'POST'])

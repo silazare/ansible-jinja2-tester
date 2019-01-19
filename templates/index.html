@@ -5,7 +5,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" integrity="sha256-rfN9xU0ELcvTsc3WUaKlvSVEfzLvFCyl+ID09aieASo=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/mode-javascript.js" integrity="sha256-9nVHCZW1SuyhaVgqmPk1XutGn+g/ASVBiVAheioldo4=" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/yamljs/0.3.0/yaml.min.js" integrity="sha256-fDg/uZo3GBErK1nydRVMJ6iZcDtOq2u3tWJtql0odec=" crossorigin="anonymous"></script>    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/parser.css') }}">
     <title>Ansible Jinja2 Tester</title>
@@ -27,11 +27,11 @@
         </div>
         <div class="values_format align-self-end text-right">
           <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            <label for="json" class="btn btn-sm btn-primary active">
-              <input type="radio" name="values_type" id="json" autocomplete="off" {{ 'checked' if values_type != 'yaml' else '' }}> JSON
+            <label for="yaml" class="btn btn-sm btn-primary{{ ' active' if values_type != 'json' else '' }}">
+              <input type="radio" name="values_type" id="yaml" autocomplete="off" {{ 'checked' if values_type != 'json' else '' }}> YAML
             </label>
-            <label for="yaml" class="btn btn-sm btn-primary">
-              <input type="radio" name="values_type" id="yaml" autocomplete="off" {{ 'checked' if values_type == 'yaml' else '' }}> YAML
+            <label for="json" class="btn btn-sm btn-primary{{ ' active' if values_type == 'json' else '' }}">
+              <input type="radio" name="values_type" id="json" autocomplete="off" {{ 'checked' if values_type == 'json' else '' }}> JSON
             </label>
           </div>
         </div>
@@ -44,12 +44,15 @@
           <h1 class="label">Template</h1>
         </div>
         <div class="template_button align-self-end text-right">
-          <button type="button" class="btn btn-sm btn-success" id="test" title="Run the test.">
-            <i class="fa fa-play text-white"></i> Test
+          <button type="button" class="btn btn-sm btn-success" id="test" title="Run the test." data-loading-text="<i class='fas fa-circle-notch fa-spin text-white'></i> Test">
+            <i class="fas fa-play text-white"></i> Test
+          </button>
+            <button type="button" class="btn btn-sm btn-danger" id="clear" title="Clear the editors.">
+            <i class="fas fa-trash text-white"></i> Clear
           </button>
           {%- if enable_snapshots %}
-          <button type="button" class="btn btn-sm btn-warning" id="snapshot" title="Take a snapshot for sharing.">
-            <span class="fa fa-camera fa-lg text-white"></span>
+          <button type="button" class="btn btn-sm btn-warning" id="snapshot" title="Take a snapshot for sharing." data-loading-text="<i class='fas fa-circle-notch fa-spin text-white'></i>">
+            <i class="fas fa-camera fa-lg text-white"></i>
           </button>
           {% endif -%}
         </div>
@@ -70,6 +73,17 @@
       </div>
     </div>
     <script type="text/javascript" charset="utf-8">
+      (function($) {
+        $.fn.buttonState = function(action) {
+          if (action === 'loading' && this.data('loading-text')) {
+            this.data('original-text', this.html()).html(this.data('loading-text')).prop('disabled', true);
+          }
+          if (action === 'reset' && this.data('original-text')) {
+            this.html(this.data('original-text')).prop('disabled', false);
+          }
+        };
+      }(jQuery));
+
       $(document).ready(() => {
         ace.config.setModuleUrl("ace/mode/jinja2", "{{ url_for('static', filename='js/jinja2.js') }}");
 
@@ -97,10 +111,32 @@
 
         $('input[name="values_type"]').change(() => {
           let values_type = $('input[name="values_type"]:checked').prop('id');
+          let values = values_editor.getValue();
+          if (values_type === 'json') {
+            values = JSON.stringify(YAML.parse(values), null, 2);
+          } else if (values_type === 'yaml') {
+            values = YAML.dump(JSON.parse(values), 2, 2);
+          }
           values_editor.session.setMode("ace/mode/" + values_type);
+          values_editor.setValue(values, 1);
         });
 
-        $('#test').click(() => {
+        $('#clear').click(() => {
+          values_editor.setValue("", 1);
+          template_editor.setValue("", 1);
+          render_editor.setValue("", 1);
+        });
+
+        $('#test').click((e) => {
+          let target = $(e.target);
+          let clear = $('#clear');
+          let snapshot = $('#snapshot');
+          target.buttonState('loading');
+          target.prop('disabled', true);
+          clear.addClass('disabled');
+          clear.prop('disabled', true);
+          snapshot.addClass('disabled');
+          snapshot.prop('disabled', true);
           let values_type = $('input[name="values_type"]:checked').prop('id');
           $.post('/test', {
             template: template_editor.getValue(),
@@ -109,6 +145,13 @@
           }).done(response => {
             let result_json = $.parseJSON(response);
             render_editor.setValue(result_json['result'], 1);
+          }).always(() => {
+            target.buttonState('reset');
+            target.prop('disabled', false);
+            clear.removeClass('disabled');
+            clear.prop('disabled', false);
+            snapshot.removeClass('disabled');
+            snapshot.prop('disabled', false);
           });
         });
 
@@ -117,7 +160,10 @@
            $('#snapshot_alert').hide();
         });
 
-        $('#snapshot').click(() => {
+        $('#snapshot').click((e) => {
+          let target = $(e.target);
+          target.buttonState('loading');
+          target.prop('disabled', true);
           let values_type = $('input[name="values_type"]:checked').prop('id');
           $.post('/snapshot', {
             values_type: values_type,
@@ -140,6 +186,8 @@
           }).always(() => {
             let snapshot_alert = $('#snapshot_alert');
             snapshot_alert.removeClass('d-none');
+            target.buttonState('reset');
+            target.prop('disabled', false);
           });
         });
         {% endif -%}
