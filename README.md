@@ -1,7 +1,6 @@
 # Ansible Jinja2 Tester
 
-All you need is Python and preferably [pip](https://pypi.python.org/pypi/pip). Can parse JSON and YAML inputs.
-A lightweight live parser for the [Ansible](https://www.ansible.com/) flavor of [Jinja2](http://jinja.pocoo.org/docs/dev/).  
+An online, interactive test tool for the [Ansible](https://www.ansible.com/) flavor of [Jinja2](http://jinja.pocoo.org/docs/dev/).  
 
 [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
