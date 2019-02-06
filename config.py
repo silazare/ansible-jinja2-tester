@@ -13,7 +13,7 @@ def _get_firebase_credentials():
 
 DEBUG = os.environ.get('DEBUG', False)
 HOST = os.environ.get('HOST', 'localhost')
-PORT = int(os.environ.get('PORT', 80))
+PORT = int(os.environ.get('PORT', 5000))
 FIREBASE_URL = os.environ.get('FIREBASE_URL')
 FIREBASE_CREDENTIALS = _get_firebase_credentials()
 
