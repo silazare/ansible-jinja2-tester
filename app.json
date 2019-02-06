@@ -3,14 +3,14 @@
   "description": "Ansible Jinja2 Tester",
   "image": "heroku/python",
   "repository": "https://github.com/kadaan/ansible-jinja2-tester",
-  "keywords": ["Ansible","Jinja2"],
+  "keywords": ["Ansible", "Jinja2"],
   "env": {
     "HOST": {
       "description": "the IP to bind to",
       "value": "0.0.0.0"
     },
     "FIREBASE_URL": {
-      "description": "the URL to the firebase realtime database for storing snapshots",
+      "description": "the URL to the firebase realtime database for storing snapshots"
     },
     "FIREBASE_CREDENTIALS_BASE64": {
       "description": "the base64 encoded credentials used to authenticate with firebase"
