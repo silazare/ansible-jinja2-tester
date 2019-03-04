@@ -101,7 +101,7 @@ def test():
         loader = DataLoader()
         templar = Templar(loader=loader, variables=values)
         try:
-            rendered = templar.template(get_template())
+            rendered = templar.template(get_template(), convert_data=False)
         except Exception as e:
             rendered = "Template rendering failed: {0}".format(e)
     except Exception as e:
