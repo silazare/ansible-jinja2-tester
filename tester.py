@@ -48,8 +48,10 @@ def home(code=None):
             values_type = escape_value(snapshot_value['values_type'])
             values = escape_value(snapshot_value['values'])
             template = escape_value(snapshot_value['template'])
-            render_type_name = escape_value(snapshot_value['render_type_name'])
-            render_type_value = escape_value(snapshot_value['render_type_value'])
+            if 'render_type_name' in snapshot_value:
+                render_type_name = escape_value(snapshot_value['render_type_name'])
+            if 'render_type_value' in snapshot_value:
+                render_type_value = escape_value(snapshot_value['render_type_value'])
             render = escape_value(snapshot_value['render'])
         except Exception as e:
             app.logger.exception('Failed to load snapshot: %s', e, )
