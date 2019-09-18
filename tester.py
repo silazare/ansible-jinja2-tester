@@ -12,8 +12,6 @@ import hashids
 import json
 import logging.handlers
 import os
-import yaml
-
 
 def is_snapshots_enabled():
     return config.FIREBASE_URL is not None and config.FIREBASE_CREDENTIALS is not None
@@ -37,6 +35,8 @@ def home(code=None):
     values_type = "yaml"
     values = ""
     template = ""
+    render_type_name = "Plain text"
+    render_type_value = "ace/mode/plain_text"
     render = ""
     if code is not None:
         if not enable_snapshots:
@@ -48,13 +48,16 @@ def home(code=None):
             values_type = escape_value(snapshot_value['values_type'])
             values = escape_value(snapshot_value['values'])
             template = escape_value(snapshot_value['template'])
+            render_type_name = escape_value(snapshot_value['render_type_name'])
+            render_type_value = escape_value(snapshot_value['render_type_value'])
             render = escape_value(snapshot_value['render'])
         except Exception as e:
             app.logger.exception('Failed to load snapshot: %s', e, )
             abort(500)
 
     return render_template('index.html', enable_snapshots=enable_snapshots, values_type=values_type, values=values,
-                           template=template, render=render, ansible_version=ansible.__version__)
+                           template=template, render_type_name=render_type_name, render_type_value=render_type_value,
+                           render=render, ansible_version=ansible.__version__)
 
 
 @app.route('/favicon.ico')
@@ -69,13 +72,17 @@ def snapshot():
         abort(404)
 
     values_type = get_values_type()
-    values = get_values_raw()
+    values = get_values()
     template = get_template()
+    render_type_name = get_render_type_name()
+    render_type_value = get_render_type_value()
     render = get_render()
     data = {
         "values_type": values_type,
         "values": values,
         "template": template,
+        "render_type_name": render_type_name,
+        "render_type_value": render_type_value,
         "render": render,
         "timestamp": {".sv": "timestamp"}
     }
@@ -96,12 +103,13 @@ def increment_counter(current_value):
 
 @app.route('/test', methods=['GET', 'POST'])
 def test():
-    values = get_values()
     try:
         loader = DataLoader()
-        templar = Templar(loader=loader, variables=values)
+        ds = loader.load(get_values())
+        templar = Templar(loader=loader)
+        templar.set_available_variables(ds)
         try:
-            rendered = templar.template(get_template(), convert_data=False)
+            rendered = templar.template(get_template(), convert_data=False, cache=False)
         except Exception as e:
             rendered = "Template rendering failed: {0}".format(e)
     except Exception as e:
@@ -123,32 +131,24 @@ def get_values_type():
         return "Unsupported value type: {0}".format(request.form['values_type'])
 
 
-def get_values_raw():
-    return request.form['values']
-
-
 def get_values():
-    values_type = get_values_type()
-    if values_type == "json":
-        try:
-            return json.loads(get_values_raw())
-        except Exception as e:
-            return "Invalid JSON: {0}".format(e)
-    elif values_type == "yaml":
-        try:
-            return yaml.load(get_values_raw())
-        except Exception as e:
-            return "Invalid YAML: {0}".format(e)
-    else:
-        return "Unsupported value type: {0}".format(values_type)
+    return request.form['values'].encode("utf-8")
 
 
 def get_template():
-    return request.form['template']
+    return request.form['template'].encode("utf-8")
 
 
 def get_render():
-    return request.form['render']
+    return request.form['render'].encode("utf-8")
+
+
+def get_render_type_name():
+    return request.form['render_type_name'].encode("utf-8")
+
+
+def get_render_type_value():
+    return request.form['render_type_value'].encode("utf-8")
 
 
 def escape_value(value):

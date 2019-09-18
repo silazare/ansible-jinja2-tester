@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" integrity="sha256-rfN9xU0ELcvTsc3WUaKlvSVEfzLvFCyl+ID09aieASo=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/mode-javascript.js" integrity="sha256-9nVHCZW1SuyhaVgqmPk1XutGn+g/ASVBiVAheioldo4=" crossorigin="anonymous"></script>
@@ -64,8 +65,41 @@
         <div class="render_label">
           <h1 class="label">Render</h1>
         </div>
-        <div class="render_data align-self-end text-right">
-            <span class="font-weight-light text-secondary">Ansible Version: {{ ansible_version }}</span>
+        <div class="render_data align-self-end text-left">
+          <span class="font-weight-light text-secondary">Ansible Version: {{ ansible_version }}</span>
+        </div>
+        <div class="dropdown render_type align-self-end text-right">
+          <button class="btn btn-primary dropdown-toggle" type="button" id="render_type_button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="selection" value="{{ render_type_value }}">{{ render_type_name }}</span>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" id="render_type_ul" aria-labelledby="render_type_button">
+            <li class="dropdown-item"><a value="ace/mode/plain_text">Plain text</a>
+            <li class="dropdown-item"><a value="ace/mode/css">CSS</a>
+            <li class="dropdown-item"><a value="ace/mode/dockerfile">Dockerfile</a>
+            <li class="dropdown-item"><a value="ace/mode/gitignore">Gitignore</a>
+            <li class="dropdown-item"><a value="ace/mode/golang">Go</a>
+            <li class="dropdown-item"><a value="ace/mode/groovy">Groovy</a>
+            <li class="dropdown-item"><a value="ace/mode/html">HTML</a>
+            <li class="dropdown-item"><a value="ace/mode/ini">INI</a>
+            <li class="dropdown-item"><a value="ace/mode/java">Java</a>
+            <li class="dropdown-item"><a value="ace/mode/javascript">JavaScript</a>
+            <li class="dropdown-item"><a value="ace/mode/json">JSON</a>
+            <li class="dropdown-item"><a value="ace/mode/makefile">Makefile</a>
+            <li class="dropdown-item"><a value="ace/mode/markdown">Markdown</a>
+            <li class="dropdown-item"><a value="ace/mode/mysql">MySQL</a>
+            <li class="dropdown-item"><a value="ace/mode/nginx">Nginx</a>
+            <li class="dropdown-item"><a value="ace/mode/php">PHP</a>
+            <li class="dropdown-item"><a value="ace/mode/properties">Properties</a>
+            <li class="dropdown-item"><a value="ace/mode/python">Python</a>
+            <li class="dropdown-item"><a value="ace/mode/r">R</a>
+            <li class="dropdown-item"><a value="ace/mode/ruby">Ruby</a>
+            <li class="dropdown-item"><a value="ace/mode/sh">SH</a>
+            <li class="dropdown-item"><a value="ace/mode/toml">Toml</a>
+            <li class="dropdown-item"><a value="ace/mode/typescript">Typescript</a>
+            <li class="dropdown-item"><a value="ace/mode/xml">XML</a>
+            <li class="dropdown-item"><a value="ace/mode/yaml">YAML</a>
+          </ul>
         </div>
         <div class="render_display">
           <div id="render"></div>
@@ -99,14 +133,16 @@
         template_editor.setTheme("ace/theme/chrome");
         template_editor.setShowInvisibles(true);
         template_editor.setShowPrintMargin(false);
-        template_editor.session.setMode("ace/mode/jinja2")
+        template_editor.session.setMode("ace/mode/jinja2");
         template_editor.setValue("{{ template|safe|escape }}", 1);
 
+        let render_type = $('.render_type').find('.selection').attr('value');
         let render_editor = ace.edit("render");
         render_editor.setTheme("ace/theme/chrome");
         render_editor.setShowInvisibles(true);
         render_editor.setShowPrintMargin(false);
         render_editor.setReadOnly(true);
+        render_editor.session.setMode(render_type);
         render_editor.setValue("{{ render|safe|escape }}", 1);
 
         $('input[name="values_type"]').change(() => {
@@ -155,6 +191,13 @@
           });
         });
 
+        $('#render_type_ul').on('click', 'li a',function(){
+          const selectvalue = $(this).attr('value');
+          $(this).parents(".render_type").find('.selection').text($(this).text());
+          $(this).parents(".render_type").find('.selection').attr('value', selectvalue);
+          render_editor.session.setMode(selectvalue);
+        });
+
         {%- if enable_snapshots %}
         $('#snapshot_alert_close_button').click(() => {
            $('#snapshot_alert').hide();
@@ -165,10 +208,15 @@
           target.buttonState('loading');
           target.prop('disabled', true);
           let values_type = $('input[name="values_type"]:checked').prop('id');
+          let render_type = $('.render_type').find('.selection')
+          let render_type_name = render_type.text();
+          let render_type_value = render_type.attr('value');
           $.post('/snapshot', {
             values_type: values_type,
             values: values_editor.getValue(),
             template: template_editor.getValue(),
+            render_type_name: render_type_name,
+            render_type_value: render_type_value,
             render: render_editor.getValue(),
           }).done((data) => {
             $('#snapshot_alert_message').html('Your snapshot is available at <a href="' + data + '">here</a>.  Copy this link to share your snapshot with others.');

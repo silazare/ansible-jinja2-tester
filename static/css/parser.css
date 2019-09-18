@@ -52,15 +52,17 @@ body, .grid-container {
 .template_editor { grid-area: template_editor; }
 
 .render {
-  grid-template-columns: 1fr;
+  grid-template-columns: 1.3fr 1.3fr 5fr;
   grid-template-rows: 2.5rem auto;
-  grid-template-areas: "render_label render_data" "render_display render_display";
+  grid-template-areas: "render_label render_data render_type" "render_display render_display render_display";
   grid-area: render;
 }
 
 .render_label { grid-area: render_label; }
 
 .render_data { grid-area: render_data; }
+
+.render_type { grid-area: render_type; }
 
 .render_display { grid-area: render_display; }
 
