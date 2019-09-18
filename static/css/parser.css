@@ -52,7 +52,7 @@ body, .grid-container {
 .template_editor { grid-area: template_editor; }
 
 .render {
-  grid-template-columns: 1.3fr 1.3fr 5fr;
+  grid-template-columns: auto 1.3fr 5fr;
   grid-template-rows: 2.5rem auto;
   grid-template-areas: "render_label render_data render_type" "render_display render_display render_display";
   grid-area: render;
