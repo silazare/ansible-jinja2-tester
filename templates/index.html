@@ -69,11 +69,11 @@
           <span class="font-weight-light text-secondary">Ansible Version: {{ ansible_version }}</span>
         </div>
         <div class="dropdown render_type align-self-end text-right">
-          <button class="btn btn-primary dropdown-toggle" type="button" id="render_type_button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="render_type_button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <span class="selection" value="{{ render_type_value }}">{{ render_type_name }}</span>
             <span class="caret"></span>
           </button>
-          <ul class="dropdown-menu" id="render_type_ul" aria-labelledby="render_type_button">
+          <ul class="dropdown-menu render_type_menu" id="render_type_ul" aria-labelledby="render_type_button">
             <li class="dropdown-item"><a value="ace/mode/plain_text">Plain text</a>
             <li class="dropdown-item"><a value="ace/mode/css">CSS</a>
             <li class="dropdown-item"><a value="ace/mode/dockerfile">Dockerfile</a>

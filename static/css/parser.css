@@ -66,6 +66,11 @@ body, .grid-container {
 
 .render_display { grid-area: render_display; }
 
+.render_type_menu {
+  overflow-y: scroll;
+  height: 200px;
+}
+
 #values, #template, #render {
   height: 100%;
 }
