@@ -111,7 +111,7 @@ def test():
         templar = Templar(loader=loader)
         templar.set_available_variables(ds)
         try:
-            rendered = templar.template(get_template(), convert_data=False, cache=False)
+            rendered = templar.template(get_template().decode("utf-8"), convert_data=False, cache=False)
         except Exception as e:
             rendered = "Template rendering failed: {0}".format(e)
     except Exception as e:

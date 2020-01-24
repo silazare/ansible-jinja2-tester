@@ -1,0 +1,6 @@
+Ansible==2.9.4
+Flask==1.1.1
+PyYAML==5.3
+firebase-admin==3.2.1
+hashids==1.2.0
+gunicorn==20.0.4
