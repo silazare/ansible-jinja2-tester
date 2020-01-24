@@ -111,7 +111,7 @@ def test():
         templar = Templar(loader=loader)
         templar.set_available_variables(ds)
         try:
-            rendered = templar.template(get_template().decode("utf-8"), convert_data=False, cache=False)
+            rendered = templar.template(get_template(), convert_data=False, cache=False)
         except Exception as e:
             rendered = "Template rendering failed: {0}".format(e)
     except Exception as e:
@@ -134,27 +134,27 @@ def get_values_type():
 
 
 def get_values():
-    return request.form['values'].encode("utf-8")
+    return request.form['values']
 
 
 def get_template():
-    return request.form['template'].encode("utf-8")
+    return request.form['template']
 
 
 def get_render():
-    return request.form['render'].encode("utf-8")
+    return request.form['render']
 
 
 def get_render_type_name():
-    return request.form['render_type_name'].encode("utf-8")
+    return request.form['render_type_name']
 
 
 def get_render_type_value():
-    return request.form['render_type_value'].encode("utf-8")
+    return request.form['render_type_value']
 
 
 def escape_value(value):
-    return str(value).encode('string_escape').replace('"', '\\"')
+    return str(value).encode('unicode-escape').decode("utf-8").replace('"', '\\"')
 
 
 if __name__ == "__main__":
