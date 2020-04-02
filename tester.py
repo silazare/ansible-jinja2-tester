@@ -1,17 +1,24 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function
 
-import ansible
-from ansible.template import Templar
-from ansible.parsing.dataloader import DataLoader
-import config
-import firebase_admin
-from firebase_admin import credentials, db
-from flask import Flask, abort, render_template, request, send_from_directory
-import hashids
 import json
 import logging.handlers
 import os
+
+import ansible
+import firebase_admin
+import hashids
+from ansible.cli import CLI
+from ansible.inventory.host import Host
+from ansible.inventory.manager import InventoryManager
+from ansible.parsing.dataloader import DataLoader
+from ansible.template import Templar
+from ansible.vars.manager import VariableManager
+from firebase_admin import credentials, db
+from flask import Flask, abort, render_template, request, send_from_directory
+
+import config
+
 
 def is_snapshots_enabled():
     return config.FIREBASE_URL is not None and config.FIREBASE_CREDENTIALS is not None
@@ -108,8 +115,15 @@ def test():
     try:
         loader = DataLoader()
         ds = loader.load(get_values())
+
+        inventory = InventoryManager(loader=loader)
+        if ds is not None:
+            for key, value in ds.items():
+                inventory.groups['all'].set_variable(key, value)
+
+        variable_manager = VariableManager(loader=loader, inventory=inventory, version_info=CLI.version_info(gitinfo=False))
         templar = Templar(loader=loader)
-        templar.set_available_variables(ds)
+        templar.available_variables = variable_manager.get_vars(host=Host(name='all'))
         try:
             rendered = templar.template(get_template(), convert_data=False, cache=False)
         except Exception as e:
