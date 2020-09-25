@@ -6,6 +6,7 @@ import logging.handlers
 import os
 
 import ansible
+import jinja2
 import firebase_admin
 import hashids
 from ansible.cli import CLI
@@ -66,7 +67,7 @@ def home(code=None):
 
     return render_template('index.html', enable_snapshots=enable_snapshots, values_type=values_type, values=values,
                            template=template, render_type_name=render_type_name, render_type_value=render_type_value,
-                           render=render, ansible_version=ansible.__version__)
+                           render=render, ansible_version=ansible.__version__, jinja2_version=jinja2.__version__)
 
 
 @app.route('/favicon.ico')
