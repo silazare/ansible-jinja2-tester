@@ -1,20 +1,15 @@
 # Ansible Jinja2 Tester
 
-An online, interactive test tool for the [Ansible](https://www.ansible.com/) flavor of [Jinja2](http://jinja.pocoo.org/docs/dev/).  
+[![Build status](https://travis-ci.org/silazare/ansible-jinja2-tester.svg?branch=master)](https://travis-ci.org/silazare)
 
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy?template=https://github.com/kadaan/ansible-jinja2-tester/tree/master)
+An online, interactive test tool for the [Ansible](https://www.ansible.com/) flavor of [Jinja2](http://jinja.pocoo.org/docs/dev/).
 
-## Demo
+## Docker build and run
 
-https://ansible-jinja2-tester.herokuapp.com/
-
-## Install
-
-### Clone + pip
-
-    $ git clone git@github.com:kadaan/ansible-jinja2-tester.git
-    $ pip install -r requirements.txt
-    $ python parser.py
+```
+$ docker build -t j2tester .
+$ docker run -d -p 5000:5000 j2tester
+```
 
 ## Usage
 
