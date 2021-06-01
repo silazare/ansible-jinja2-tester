@@ -1,7 +1,5 @@
 # Ansible Jinja2 Tester
 
-[![Build status](https://travis-ci.org/silazare/ansible-jinja2-tester.svg?branch=master)](https://travis-ci.org/silazare)
-
 An online, interactive test tool for the [Ansible](https://www.ansible.com/) flavor of [Jinja2](http://jinja.pocoo.org/docs/dev/).
 
 ## Docker build and run
