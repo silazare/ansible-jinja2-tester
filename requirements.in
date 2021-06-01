@@ -1,4 +1,5 @@
-Ansible==2.9.20
+Ansible==4.0.0
+Jinja2==2.11.2
 Flask==1.1.2
 PyYAML==5.4.1
 firebase-admin==4.5.3
